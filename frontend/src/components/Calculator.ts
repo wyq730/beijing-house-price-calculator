@@ -1,4 +1,6 @@
 /**
+ * 计算模块。
+ *
  * 假设：
  * - 网签价高于核定价。
  *
@@ -14,21 +16,39 @@ interface HousePriceArgument {
     | 'second_class_affordable'
   buyerPropertyNumber: number
   timeSinceObtainedBySeller: 'longer_than_5' | '2_to_5' | 'shorter_than_2' // merge whetherOwnMoreThanTwo and whetherOwnMoreThanFive
-  whetherSellerOnlyProperty: boolean
-  largerThan90: boolean
+
+  // 不满五 (timeSinceObtainedBySeller 不为 longer_than_5) 时，需要填写。
+  whetherSellerOnlyProperty: boolean | null
+
+  // 二套 (buyerPropertyNumber 不为 1) 时，需要填写。
+  largerThan90: boolean | null
+
   generalHouse: boolean
-  ringRoadRegion: 'inside_5' | 'between_5_and_6' | 'outside_6'
-  insideSixUrbanDistrict: boolean
+
+  // 目前不用填写。后面添加贷款计算时，需要填写。
+  ringRoadRegion: 'inside_5' | 'between_5_and_6' | 'outside_6' | null
+
+  // 已购公房需要填写。
+  insideSixUrbanDistrict: boolean | null
 
   signedPrice: number
-  buildingArea: number
 
-  originalPrice: number
-  originalDeedTax: number
-  sellerPaidInterest: number
+  // 已购公房需要填写。
+  buildingArea: number | null
 
-  purchasedPublicAtDiscountedPrice: boolean
-  firstClassAffordableBuyBefore20080411: boolean
+  originalPrice: number | null
+
+  // 不满五唯一时，需要填写。
+  originalDeedTax: number | null
+
+  // 不满五唯一时，需要填写。
+  sellerPaidInterest: number | null
+
+  // 已购公房需要填写。
+  purchasedPublicAtDiscountedPrice: boolean | null
+
+  // 一类经适房需要填写。
+  firstClassAffordableBuyBefore20080411: boolean | null
 }
 
 interface HousePriceItem {
@@ -122,13 +142,8 @@ class HousePriceCalculator {
 
   // 计算增值税。
   calculateVAT(): number {
-    // 这里，二类经适、已购公房也按普宅处理
-    const consideredAsGeneral =
-      this._arg.generalHouse ||
-      ['purchased_public', 'second_class_affordable'].includes(this._arg.propertyType)
-
     // case: 满二，普宅
-    if (this._obtainedForMoreThanTwo() && consideredAsGeneral) {
+    if (this._obtainedForMoreThanTwo() && this._consideredAsGeneral()) {
       return 0
     }
 
@@ -198,7 +213,118 @@ class HousePriceCalculator {
     return this._arg.timeSinceObtainedBySeller !== 'shorter_than_2'
   }
 
-  _check(arg: HousePriceArgument) {
+  // 有些时候（不确定是不是所有时候），如计算增值税时，当做普宅处理的条件。
+  _consideredAsGeneral() {
+    // 二类经适、已购公房也按普宅处理。
+    return (
+      this._arg.generalHouse ||
+      ['purchased_public', 'second_class_affordable'].includes(this._arg.propertyType)
+    )
+  }
+
+  /**
+   * Assume all fields can be null. Check if required fields are non-null.
+   */
+  static checkEnough(arg: HousePriceArgument) {
+    if (arg.propertyType === null) {
+      return false
+    }
+
+    if (arg.buyerPropertyNumber === null) {
+      return false
+    }
+
+    if (arg.timeSinceObtainedBySeller === null) {
+      return false
+    }
+
+    if (arg.whetherSellerOnlyProperty === null) {
+      if (arg.timeSinceObtainedBySeller !== 'longer_than_5') {
+        return false
+      }
+    }
+
+    if (arg.largerThan90 === null) {
+      if (arg.buyerPropertyNumber === 1) {
+        return false
+      }
+    }
+
+    if (arg.generalHouse === null) {
+      return false
+    }
+
+    if (arg.ringRoadRegion === null) {
+      // pass
+    }
+
+    if (arg.insideSixUrbanDistrict === null) {
+      if (arg.propertyType === 'purchased_public') {
+        return false
+      }
+    }
+
+    if (arg.buildingArea === null) {
+      if (arg.propertyType === 'purchased_public') {
+        return false
+      }
+    }
+
+    if (arg.signedPrice === null) {
+      return false
+    }
+
+    if (arg.originalPrice === null) {
+      if (!(arg.timeSinceObtainedBySeller === 'longer_than_5' && arg.whetherSellerOnlyProperty)) {
+        return false
+      }
+
+      if (
+        arg.timeSinceObtainedBySeller !== 'shorter_than_2' &&
+        !(
+          arg.generalHouse ||
+          ['purchased_public', 'second_class_affordable'].includes(arg.propertyType)
+        )
+      ) {
+        return false
+      }
+
+      if (
+        arg.propertyType === 'first_class_affordable' &&
+        !arg.firstClassAffordableBuyBefore20080411
+      ) {
+        return false
+      }
+    }
+
+    if (arg.originalDeedTax === null) {
+      if (!(arg.timeSinceObtainedBySeller === 'longer_than_5' && arg.whetherSellerOnlyProperty)) {
+        return false
+      }
+    }
+
+    if (arg.sellerPaidInterest === null) {
+      if (!(arg.timeSinceObtainedBySeller === 'longer_than_5' && arg.whetherSellerOnlyProperty)) {
+        return false
+      }
+    }
+
+    if (arg.purchasedPublicAtDiscountedPrice === null) {
+      if (arg.propertyType === 'purchased_public') {
+        return false
+      }
+    }
+
+    if (arg.firstClassAffordableBuyBefore20080411 === null) {
+      if (arg.propertyType === 'first_class_affordable') {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  _checkMisc(arg: HousePriceArgument) {
     if (arg.signedPrice < arg.originalPrice) {
       return {
         valid: false,

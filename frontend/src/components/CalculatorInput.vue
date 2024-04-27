@@ -135,10 +135,12 @@ watch(
       firstClassAffordableBuyBefore20080411
     }
 
-    console.log(arg)
-    const calculator = new HousePriceCalculator(arg)
-    const res = calculator.calculate()
-    emit('update-result', res)
+    if (!HousePriceCalculator.checkEnough(arg)) {
+      emit('update-result', null)
+    } else {
+      const res = new HousePriceCalculator(arg).calculate()
+      emit('update-result', res)
+    }
   }
 )
 </script>

@@ -5,7 +5,8 @@ import CalculatorResult from './CalculatorResult.vue'
 import { type HousePriceResult } from './Calculator'
 
 const result = ref<HousePriceResult | null>(null)
-function updateResult(newResult) {
+function updateResult(newResult: HousePriceResult | null) {
+  console.log('new result', newResult)
   result.value = newResult
 }
 </script>

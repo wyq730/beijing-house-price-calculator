@@ -11,7 +11,7 @@ const displayDigitNumberAfterDecimalPoint = 2
 
 <template>
   <div id="calculator-result">
-    <div>总费用 {{ props.result?.total.toFixed(displayDigitNumberAfterDecimalPoint) }}</div>
+    <div>总费用: {{ props.result?.total.toFixed(displayDigitNumberAfterDecimalPoint) }}</div>
     <div v-for="item in props.result?.breakdown" :key="item.name">
       {{ item.name }}: {{ item.price.toFixed(displayDigitNumberAfterDecimalPoint) }}
     </div>
