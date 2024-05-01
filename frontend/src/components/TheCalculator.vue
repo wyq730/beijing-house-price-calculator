@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import CalculatorInput from './CalculatorInput.vue'
 import CalculatorResult from './CalculatorResult.vue'
-import { type HousePriceResult } from './Calculator'
+import { type HousePriceResult } from './RuleBasedCalculator'
 
 const result = ref<HousePriceResult | null>(null)
 function updateResult(newResult: HousePriceResult | null) {

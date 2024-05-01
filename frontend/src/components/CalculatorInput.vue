@@ -2,7 +2,6 @@
 import { ref, watch } from 'vue'
 import { NInputNumber } from 'naive-ui'
 import OptionSelector from './OptionSelector.vue'
-import { HousePriceCalculator, HousePriceResult } from './Calculator'
 import RuleBasedCalculator from './RuleBasedCalculator'
 import TimeSinceObtainedBySellerInput from './ItemInput/TimeSinceObtainedBySellerInput.vue'
 

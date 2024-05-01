@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import { type HousePriceResult } from './Calculator'
+import { type HousePriceResult } from './RuleBasedCalculator'
 
 const props = defineProps({
   result: Object as PropType<HousePriceResult>

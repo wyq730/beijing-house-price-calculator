@@ -23,7 +23,7 @@
  *   - 相关状态：每个规则的状态（pending / finish / wait_input / wait_upstream）, deps
  */
 
-import { type HousePriceArgument } from './Calculator'
+import { type HousePriceArgument } from './RuleBasedCalculator'
 
 // What I actually want:
 //

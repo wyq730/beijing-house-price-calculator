@@ -8,9 +8,61 @@
  * - “城市维护建设税” 为 5% 的区域（影响增值税附加）。
  */
 
-import type { HousePriceArgument, HousePriceResult } from './Calculator'
 import { rules, type ItemCalculator } from './Rules'
 import { assert } from './Utils'
+
+interface HousePriceArgument {
+  propertyType:
+    | 'commercial'
+    | 'purchased_public'
+    | 'first_class_affordable'
+    | 'second_class_affordable'
+  buyerPropertyNumber: number
+  timeSinceObtainedBySeller: 'longer_than_5' | '2_to_5' | 'shorter_than_2' // merge whetherOwnMoreThanTwo and whetherOwnMoreThanFive
+
+  // 不满五 (timeSinceObtainedBySeller 不为 longer_than_5) 时，需要填写。
+  whetherSellerOnlyProperty: boolean | null
+
+  // 二套 (buyerPropertyNumber 不为 1) 时，需要填写。
+  largerThan90: boolean | null
+
+  generalHouse: boolean
+
+  // 目前不用填写。后面添加贷款计算时，需要填写。
+  ringRoadRegion: 'inside_5' | 'between_5_and_6' | 'outside_6' | null
+
+  // 已购公房需要填写。
+  insideSixUrbanDistrict: boolean | null
+
+  signedPrice: number
+
+  // 已购公房需要填写。
+  buildingArea: number | null
+
+  originalPrice: number | null
+
+  // 不满五唯一时，需要填写。
+  originalDeedTax: number | null
+
+  // 不满五唯一时，需要填写。
+  sellerPaidInterest: number | null
+
+  // 已购公房需要填写。
+  purchasedPublicAtDiscountedPrice: boolean | null
+
+  // 一类经适房需要填写。
+  firstClassAffordableBuyBefore20080411: boolean | null
+}
+
+interface HousePriceItem {
+  name: string
+  price: number
+}
+
+interface HousePriceResult {
+  total: number
+  breakdown: HousePriceItem[]
+}
 
 class RuleBasedCalculator {
   _arg
@@ -169,3 +221,4 @@ class RuleBasedCalculator {
 }
 
 export default RuleBasedCalculator
+export { type HousePriceResult, type HousePriceArgument }
