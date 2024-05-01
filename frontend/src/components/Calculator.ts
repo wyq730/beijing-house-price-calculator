@@ -1,13 +1,3 @@
-/**
- * 计算模块。
- *
- * 假设：
- * - 网签价高于核定价。
- *
- * 没考虑：
- * - “城市维护建设税” 为 5% 的区域（影响增值税附加）。
- */
-
 interface HousePriceArgument {
   propertyType:
     | 'commercial'
@@ -338,4 +328,4 @@ class HousePriceCalculator {
   }
 }
 
-export { type HousePriceResult, HousePriceCalculator }
+export { type HousePriceResult, type HousePriceArgument, HousePriceCalculator }

@@ -3,6 +3,8 @@ import { ref, watch } from 'vue'
 import { NInputNumber } from 'naive-ui'
 import OptionSelector from './OptionSelector.vue'
 import { HousePriceCalculator, HousePriceResult } from './Calculator'
+import RuleBasedCalculator from './RuleBasedCalculator'
+import TimeSinceObtainedBySellerInput from './ItemInput/TimeSinceObtainedBySellerInput.vue'
 
 const emit = defineEmits(['update-result'])
 
@@ -40,8 +42,7 @@ const firstClassAffordableBuyBefore20080411Options = [
 
 const propertyType = ref<string | null>(null)
 const buyerPropertyNumber = ref<number | null>(null)
-const whetherOwnMoreThanFive = ref<boolean | null>(null)
-const whetherOwnMoreThanTwo = ref<boolean | null>(null)
+const timeSinceObtainedBySeller = ref<number | null>(null)
 const whetherSellerOnlyProperty = ref<boolean | null>(null)
 const largerThan90 = ref<boolean | null>(null)
 const generalHouse = ref<boolean | null>(null) // 是否为普通住宅。
@@ -59,12 +60,12 @@ const purchasedPublicAtDiscountedPrice = ref<number | null>(null)
 
 const firstClassAffordableBuyBefore20080411 = ref<boolean | null>(null)
 
+const currentRequiredInputs = ref<Set<string>>(new Set())
 watch(
   [
     propertyType,
     buyerPropertyNumber,
-    whetherOwnMoreThanFive,
-    whetherOwnMoreThanTwo,
+    timeSinceObtainedBySeller,
     whetherSellerOnlyProperty,
     largerThan90,
     generalHouse,
@@ -84,8 +85,7 @@ watch(
   async ([
     propertyType,
     buyerPropertyNumber,
-    whetherOwnMoreThanFive,
-    whetherOwnMoreThanTwo,
+    timeSinceObtainedBySeller,
     whetherSellerOnlyProperty,
     largerThan90,
     generalHouse,
@@ -102,19 +102,6 @@ watch(
     purchasedPublicAtDiscountedPrice,
     firstClassAffordableBuyBefore20080411
   ]) => {
-    let timeSinceObtainedBySeller
-    if (whetherOwnMoreThanFive === null) {
-      timeSinceObtainedBySeller = null
-    } else if (whetherOwnMoreThanFive === true) {
-      timeSinceObtainedBySeller = 'longer_than_5'
-    } else if (whetherOwnMoreThanTwo === null) {
-      timeSinceObtainedBySeller = null
-    } else if (whetherOwnMoreThanTwo === true) {
-      timeSinceObtainedBySeller = '2_to_5'
-    } else {
-      timeSinceObtainedBySeller = 'shorter_than_2'
-    }
-
     const arg = {
       propertyType,
       buyerPropertyNumber,
@@ -135,93 +122,18 @@ watch(
       firstClassAffordableBuyBefore20080411
     }
 
-    if (!HousePriceCalculator.checkEnough(arg)) {
-      emit('update-result', null)
-    } else {
-      const res = new HousePriceCalculator(arg).calculate()
-      emit('update-result', res)
-    }
-  }
+    const calculator = new RuleBasedCalculator(arg)
+    const res = calculator.calculateOrFindMissedInputs()
+    currentRequiredInputs.value = new Set(calculator.requiredInputs())
+    emit('update-result', res)
+  },
+  { immediate: true }
 )
 </script>
 
 <template>
   <div id="calculator-input">
-    <div class="section">
-      <OptionSelector
-        title="房屋性质是？"
-        :options="propertyTypeOptions"
-        v-model:selected-value="propertyType"
-      />
-    </div>
-
-    <div class="section">
-      <OptionSelector
-        title="是买方的第几套住房？"
-        :options="houseNumberOptions"
-        v-model:selected-value="buyerPropertyNumber"
-      />
-    </div>
-
-    <div class="section">
-      <OptionSelector
-        title="是否为卖方的唯一住房？"
-        :options="boolOptions"
-        v-model:selected-value="whetherSellerOnlyProperty"
-      />
-    </div>
-
-    <div class="section">
-      <div class="subsection">
-        <OptionSelector
-          title="卖方是否取得房产证满 5 年？"
-          :options="boolOptions"
-          v-model:selected-value="whetherOwnMoreThanFive"
-        />
-      </div>
-
-      <div class="subsection" v-if="whetherOwnMoreThanFive === false">
-        <OptionSelector
-          title="卖方是否取得房产证满 2 年？"
-          :options="boolOptions"
-          v-model:selected-value="whetherOwnMoreThanTwo"
-        />
-      </div>
-    </div>
-
-    <div class="section" v-if="buyerPropertyNumber === 1">
-      <OptionSelector
-        title="是否大于 90 平米？"
-        :options="boolOptions"
-        v-model:selected-value="largerThan90"
-      />
-    </div>
-
-    <div class="section">
-      <OptionSelector
-        title="是否为普通住宅？"
-        :options="boolOptions"
-        v-model:selected-value="generalHouse"
-      />
-    </div>
-
-    <div class="section">
-      <OptionSelector
-        title="在几环？"
-        :options="ringRoadRegionOptions"
-        v-model:selected-value="ringRoadRegion"
-      />
-    </div>
-
-    <div class="section">
-      <OptionSelector
-        title="是否在城六区内？"
-        :options="boolOptions"
-        v-model:selected-value="insideSixUrbanDistrict"
-      />
-    </div>
-
-    <div class="section">
+    <div v-show="currentRequiredInputs.has('signedPrice')" class="section">
       <div class="title">网签价多少？</div>
       <n-input-number
         v-model:value="signedPrice"
@@ -231,7 +143,72 @@ watch(
       />
     </div>
 
-    <div class="section">
+    <div v-show="currentRequiredInputs.has('propertyType')" class="section">
+      <OptionSelector
+        title="房屋性质是？"
+        :options="propertyTypeOptions"
+        v-model:selected-value="propertyType"
+      />
+    </div>
+
+    <div v-show="currentRequiredInputs.has('buyerPropertyNumber')" class="section">
+      <OptionSelector
+        title="是买方的第几套住房？"
+        :options="houseNumberOptions"
+        v-model:selected-value="buyerPropertyNumber"
+      />
+    </div>
+
+    <div v-show="currentRequiredInputs.has('whetherSellerOnlyProperty')" class="section">
+      <OptionSelector
+        title="是否为卖方的唯一住房？"
+        :options="boolOptions"
+        v-model:selected-value="whetherSellerOnlyProperty"
+      />
+    </div>
+
+    <TimeSinceObtainedBySellerInput
+      v-show="currentRequiredInputs.has('timeSinceObtainedBySeller')"
+      @update-value="
+        (v) => {
+          timeSinceObtainedBySeller = v
+        }
+      "
+    />
+
+    <div v-show="currentRequiredInputs.has('largerThan90')" class="section">
+      <OptionSelector
+        title="是否大于 90 平米？"
+        :options="boolOptions"
+        v-model:selected-value="largerThan90"
+      />
+    </div>
+
+    <div v-show="currentRequiredInputs.has('generalHouse')" class="section">
+      <OptionSelector
+        title="是否为普通住宅？"
+        :options="boolOptions"
+        v-model:selected-value="generalHouse"
+      />
+    </div>
+
+    <div v-show="currentRequiredInputs.has('ringRoadRegion')" class="section">
+      <OptionSelector
+        title="在几环？"
+        :options="ringRoadRegionOptions"
+        v-model:selected-value="ringRoadRegion"
+      />
+    </div>
+
+    <div v-show="currentRequiredInputs.has('insideSixUrbanDistrict')" class="section">
+      <OptionSelector
+        title="是否在城六区内？"
+        :options="boolOptions"
+        v-model:selected-value="insideSixUrbanDistrict"
+      />
+    </div>
+
+    <div v-show="currentRequiredInputs.has('buildingArea')" class="section">
       <div class="title">建筑面积是多少？</div>
       <n-input-number
         v-model:value="buildingArea"
@@ -241,7 +218,7 @@ watch(
       />
     </div>
 
-    <div class="section">
+    <div v-show="currentRequiredInputs.has('originalPrice')" class="section">
       <div class="title">原值多少？</div>
       <n-input-number
         v-model:value="originalPrice"
@@ -251,7 +228,7 @@ watch(
       />
     </div>
 
-    <div class="section">
+    <div v-show="currentRequiredInputs.has('originalDeedTax')" class="section">
       <div class="title">原契税多少？</div>
       <n-input-number
         v-model:value="originalDeedTax"
@@ -261,7 +238,7 @@ watch(
       />
     </div>
 
-    <div class="section">
+    <div v-show="currentRequiredInputs.has('sellerPaidInterest')" class="section">
       <div class="title">卖方已经支付的贷款利息有多少？</div>
       <n-input-number
         v-model:value="sellerPaidInterest"
@@ -271,7 +248,7 @@ watch(
       />
     </div>
 
-    <div class="section">
+    <div v-show="currentRequiredInputs.has('purchasedPublicAtDiscountedPrice')" class="section">
       <OptionSelector
         title="该公房是否是按照标准价/成本价（而不是优惠价）购买的？"
         :options="boolOptions"
@@ -279,7 +256,10 @@ watch(
       />
     </div>
 
-    <div class="section">
+    <div
+      v-show="currentRequiredInputs.has('firstClassAffordableBuyBefore20080411')"
+      class="section"
+    >
       <OptionSelector
         title="该一类经适房是在什么时候签订购房合同的？"
         :options="firstClassAffordableBuyBefore20080411Options"
@@ -289,7 +269,9 @@ watch(
   </div>
 </template>
 
-<style scoped>
+<style scoped></style>
+
+<style>
 .section {
   margin-bottom: 20px;
 }
@@ -297,9 +279,7 @@ watch(
 .subsection {
   margin-bottom: 20px;
 }
-</style>
 
-<style>
 .title {
   margin-bottom: 10px;
 }
