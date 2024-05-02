@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import OptionSelector from '../OptionSelector.vue'
+import { NCollapseTransition } from 'naive-ui'
 
 const emit = defineEmits(['update-value'])
 
@@ -41,13 +42,15 @@ watch(
       />
     </div>
 
-    <div class="subsection" v-if="whetherOwnMoreThanFive === false">
-      <OptionSelector
-        title="卖方是否取得房产证满 2 年？"
-        :options="boolOptions"
-        v-model:selected-value="whetherOwnMoreThanTwo"
-      />
-    </div>
+    <n-collapse-transition :show="whetherOwnMoreThanFive === false">
+      <div class="subsection">
+        <OptionSelector
+          title="卖方是否取得房产证满 2 年？"
+          :options="boolOptions"
+          v-model:selected-value="whetherOwnMoreThanTwo"
+        />
+      </div>
+    </n-collapse-transition>
   </div>
 </template>
 <style scoped></style>

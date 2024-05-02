@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { NInputNumber } from 'naive-ui'
+import { NInputNumber, NCollapseTransition } from 'naive-ui'
 import OptionSelector from './OptionSelector.vue'
 import RuleBasedCalculator from './RuleBasedCalculator'
 import TimeSinceObtainedBySellerInput from './ItemInput/TimeSinceObtainedBySellerInput.vue'
@@ -132,139 +132,167 @@ watch(
 
 <template>
   <div id="calculator-input">
-    <div v-show="currentRequiredInputs.has('signedPrice')" class="section">
-      <div class="title">网签价多少？</div>
-      <n-input-number
-        v-model:value="signedPrice"
-        clearable
-        placeholder="网签价（万元）"
-        style="width: 200px"
+    <n-collapse-transition :show="currentRequiredInputs.has('signedPrice')">
+      <div class="section">
+        <div class="title">网签价多少？</div>
+        <n-input-number
+          v-model:value="signedPrice"
+          clearable
+          placeholder="网签价（万元）"
+          style="width: 200px"
+        />
+      </div>
+    </n-collapse-transition>
+
+    <n-collapse-transition :show="currentRequiredInputs.has('propertyType')">
+      <div class="section">
+        <OptionSelector
+          title="房屋性质是？"
+          :options="propertyTypeOptions"
+          v-model:selected-value="propertyType"
+        />
+      </div>
+    </n-collapse-transition>
+
+    <n-collapse-transition :show="currentRequiredInputs.has('buyerPropertyNumber')">
+      <div class="section">
+        <OptionSelector
+          title="是买方的第几套住房？"
+          :options="houseNumberOptions"
+          v-model:selected-value="buyerPropertyNumber"
+        />
+      </div>
+    </n-collapse-transition>
+
+    <n-collapse-transition :show="currentRequiredInputs.has('whetherSellerOnlyProperty')">
+      <div class="section">
+        <OptionSelector
+          title="是否为卖方的唯一住房？"
+          :options="boolOptions"
+          v-model:selected-value="whetherSellerOnlyProperty"
+        />
+      </div>
+    </n-collapse-transition>
+
+    <n-collapse-transition :show="currentRequiredInputs.has('timeSinceObtainedBySeller')">
+      <TimeSinceObtainedBySellerInput
+        @update-value="
+          (v) => {
+            timeSinceObtainedBySeller = v
+          }
+        "
       />
-    </div>
+    </n-collapse-transition>
 
-    <div v-show="currentRequiredInputs.has('propertyType')" class="section">
-      <OptionSelector
-        title="房屋性质是？"
-        :options="propertyTypeOptions"
-        v-model:selected-value="propertyType"
-      />
-    </div>
+    <n-collapse-transition :show="currentRequiredInputs.has('largerThan90')">
+      <div class="section">
+        <OptionSelector
+          title="是否大于 90 平米？"
+          :options="boolOptions"
+          v-model:selected-value="largerThan90"
+        />
+      </div>
+    </n-collapse-transition>
 
-    <div v-show="currentRequiredInputs.has('buyerPropertyNumber')" class="section">
-      <OptionSelector
-        title="是买方的第几套住房？"
-        :options="houseNumberOptions"
-        v-model:selected-value="buyerPropertyNumber"
-      />
-    </div>
+    <n-collapse-transition :show="currentRequiredInputs.has('generalHouse')">
+      <div class="section">
+        <OptionSelector
+          title="是否为普通住宅？"
+          :options="boolOptions"
+          v-model:selected-value="generalHouse"
+        />
+      </div>
+    </n-collapse-transition>
 
-    <div v-show="currentRequiredInputs.has('whetherSellerOnlyProperty')" class="section">
-      <OptionSelector
-        title="是否为卖方的唯一住房？"
-        :options="boolOptions"
-        v-model:selected-value="whetherSellerOnlyProperty"
-      />
-    </div>
+    <n-collapse-transition :show="currentRequiredInputs.has('ringRoadRegion')">
+      <div class="section">
+        <OptionSelector
+          title="在几环？"
+          :options="ringRoadRegionOptions"
+          v-model:selected-value="ringRoadRegion"
+        />
+      </div>
+    </n-collapse-transition>
 
-    <TimeSinceObtainedBySellerInput
-      v-show="currentRequiredInputs.has('timeSinceObtainedBySeller')"
-      @update-value="
-        (v) => {
-          timeSinceObtainedBySeller = v
-        }
-      "
-    />
+    <n-collapse-transition :show="currentRequiredInputs.has('insideSixUrbanDistrict')">
+      <div class="section">
+        <OptionSelector
+          title="是否在城六区内？"
+          :options="boolOptions"
+          v-model:selected-value="insideSixUrbanDistrict"
+        />
+      </div>
+    </n-collapse-transition>
 
-    <div v-show="currentRequiredInputs.has('largerThan90')" class="section">
-      <OptionSelector
-        title="是否大于 90 平米？"
-        :options="boolOptions"
-        v-model:selected-value="largerThan90"
-      />
-    </div>
+    <n-collapse-transition :show="currentRequiredInputs.has('buildingArea')">
+      <div class="section">
+        <div class="title">建筑面积是多少？</div>
+        <n-input-number
+          v-model:value="buildingArea"
+          clearable
+          placeholder="建筑面积（平米）"
+          style="width: 200px"
+        />
+      </div>
+    </n-collapse-transition>
 
-    <div v-show="currentRequiredInputs.has('generalHouse')" class="section">
-      <OptionSelector
-        title="是否为普通住宅？"
-        :options="boolOptions"
-        v-model:selected-value="generalHouse"
-      />
-    </div>
+    <n-collapse-transition :show="currentRequiredInputs.has('originalPrice')">
+      <div class="section">
+        <div class="title">原值多少？</div>
+        <n-input-number
+          v-model:value="originalPrice"
+          clearable
+          placeholder="原值（万元）"
+          style="width: 200px"
+        />
+      </div>
+    </n-collapse-transition>
 
-    <div v-show="currentRequiredInputs.has('ringRoadRegion')" class="section">
-      <OptionSelector
-        title="在几环？"
-        :options="ringRoadRegionOptions"
-        v-model:selected-value="ringRoadRegion"
-      />
-    </div>
+    <n-collapse-transition :show="currentRequiredInputs.has('originalDeedTax')">
+      <div class="section">
+        <div class="title">原契税多少？</div>
+        <n-input-number
+          v-model:value="originalDeedTax"
+          clearable
+          placeholder="原契税（万元）"
+          style="width: 200px"
+        />
+      </div>
+    </n-collapse-transition>
 
-    <div v-show="currentRequiredInputs.has('insideSixUrbanDistrict')" class="section">
-      <OptionSelector
-        title="是否在城六区内？"
-        :options="boolOptions"
-        v-model:selected-value="insideSixUrbanDistrict"
-      />
-    </div>
+    <n-collapse-transition :show="currentRequiredInputs.has('sellerPaidInterest')">
+      <div class="section">
+        <div class="title">卖方已经支付的贷款利息有多少？</div>
+        <n-input-number
+          v-model:value="sellerPaidInterest"
+          clearable
+          placeholder="卖方已经支付的贷款利息（万元）"
+          style="width: 200px"
+        />
+      </div>
+    </n-collapse-transition>
 
-    <div v-show="currentRequiredInputs.has('buildingArea')" class="section">
-      <div class="title">建筑面积是多少？</div>
-      <n-input-number
-        v-model:value="buildingArea"
-        clearable
-        placeholder="建筑面积（平米）"
-        style="width: 200px"
-      />
-    </div>
+    <n-collapse-transition :show="currentRequiredInputs.has('purchasedPublicAtDiscountedPrice')">
+      <div class="section">
+        <OptionSelector
+          title="该公房是否是按照标准价/成本价（而不是优惠价）购买的？"
+          :options="boolOptions"
+          v-model:selected-value="purchasedPublicAtDiscountedPrice"
+        />
+      </div>
+    </n-collapse-transition>
 
-    <div v-show="currentRequiredInputs.has('originalPrice')" class="section">
-      <div class="title">原值多少？</div>
-      <n-input-number
-        v-model:value="originalPrice"
-        clearable
-        placeholder="原值（万元）"
-        style="width: 200px"
-      />
-    </div>
-
-    <div v-show="currentRequiredInputs.has('originalDeedTax')" class="section">
-      <div class="title">原契税多少？</div>
-      <n-input-number
-        v-model:value="originalDeedTax"
-        clearable
-        placeholder="原契税（万元）"
-        style="width: 200px"
-      />
-    </div>
-
-    <div v-show="currentRequiredInputs.has('sellerPaidInterest')" class="section">
-      <div class="title">卖方已经支付的贷款利息有多少？</div>
-      <n-input-number
-        v-model:value="sellerPaidInterest"
-        clearable
-        placeholder="卖方已经支付的贷款利息（万元）"
-        style="width: 200px"
-      />
-    </div>
-
-    <div v-show="currentRequiredInputs.has('purchasedPublicAtDiscountedPrice')" class="section">
-      <OptionSelector
-        title="该公房是否是按照标准价/成本价（而不是优惠价）购买的？"
-        :options="boolOptions"
-        v-model:selected-value="purchasedPublicAtDiscountedPrice"
-      />
-    </div>
-
-    <div
-      v-show="currentRequiredInputs.has('firstClassAffordableBuyBefore20080411')"
-      class="section"
+    <n-collapse-transition
+      :show="currentRequiredInputs.has('firstClassAffordableBuyBefore20080411')"
     >
-      <OptionSelector
-        title="该一类经适房是在什么时候签订购房合同的？"
-        :options="firstClassAffordableBuyBefore20080411Options"
-        v-model:selected-value="firstClassAffordableBuyBefore20080411"
-      />
-    </div>
+      <div class="section">
+        <OptionSelector
+          title="该一类经适房是在什么时候签订购房合同的？"
+          :options="firstClassAffordableBuyBefore20080411Options"
+          v-model:selected-value="firstClassAffordableBuyBefore20080411"
+        />
+      </div>
+    </n-collapse-transition>
   </div>
 </template>
 
