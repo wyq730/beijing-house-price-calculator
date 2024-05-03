@@ -3,7 +3,7 @@ import { watch, type PropType, ref, nextTick } from 'vue'
 import { type HousePriceResult } from './RuleBasedCalculator'
 import { NNumberAnimation, NumberAnimationInst } from 'naive-ui'
 
-const displayDigitNumberAfterDecimalPoint = 2
+const displayDigitNumberAfterDecimalPoint = 0
 
 const props = defineProps({
   result: Object as PropType<HousePriceResult>
@@ -12,6 +12,7 @@ const props = defineProps({
 const numberAnimationInstRef = ref<NumberAnimationInst | null>(null)
 const currentTotal = ref<number | null>(null)
 const lastTotal = ref<number | null>(null)
+const showAll = ref<boolean>(false)
 
 watch(
   () => props.result,
@@ -25,7 +26,12 @@ watch(
 </script>
 
 <template>
-  <div id="calculator-result">
+  <div
+    id="calculator-result"
+    :style="{ height: !showAll ? '28px' : '280px' }"
+    style="z-index: -1"
+    @click="showAll = !showAll"
+  >
     <div>
       <span class="total-text">总费用</span>
       <span class="total-number">
@@ -39,23 +45,28 @@ watch(
         />
       </span>
     </div>
-    <!-- <div v-for="item in props.result?.breakdown" :key="item.name">
-      - {{ item.name }}: {{ item.price.toFixed(displayDigitNumberAfterDecimalPoint) }}
-    </div> -->
+    <Transition>
+      <div v-if="showAll" style="margin-top: 18px">
+        <div v-for="item in props.result?.breakdown" :key="item.name">
+          <span class="breakdown-text">{{ item.name }}</span>
+          <span class="breakdown-number">{{
+            item.price.toFixed(displayDigitNumberAfterDecimalPoint)
+          }}</span>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <style scoped>
 #calculator-result {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+  transition: height 400ms;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
   padding: 20px;
 }
 
 .total-text {
+  font-size: 16px;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.6);
 }
@@ -66,5 +77,29 @@ watch(
   font-size: 18px;
   font-weight: bold;
   color: forestgreen;
+}
+
+.breakdown-text {
+  font-weight: bold;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.breakdown-number {
+  margin-left: 8px;
+
+  font-size: 16px;
+  font-weight: bold;
+  color: rgba(34, 139, 34, 0.8);
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 </style>
