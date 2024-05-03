@@ -6,7 +6,6 @@ import { type HousePriceResult } from './RuleBasedCalculator'
 
 const result = ref<HousePriceResult | null>(null)
 function updateResult(newResult: HousePriceResult | null) {
-  console.log('new result', newResult)
   result.value = newResult
 }
 </script>

@@ -99,8 +99,6 @@ class RuleBasedCalculator {
       }
     }
 
-    console.log('missing:', this._missingArgs())
-
     if (!this._isPriceReady()) {
       return null
     }

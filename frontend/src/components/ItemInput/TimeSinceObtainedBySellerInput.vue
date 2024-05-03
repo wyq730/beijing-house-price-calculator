@@ -13,6 +13,13 @@ const boolOptions = [
 const whetherOwnMoreThanFive = ref<boolean | null>(null)
 const whetherOwnMoreThanTwo = ref<boolean | null>(null)
 
+function onWhetherOwnMoreThanFiveUpdate(newVal: boolean) {
+  // Reset 'whetherOwnMoreThanTwo' if 'whetherOwnMoreThanFive' is true.
+  if (newVal === true) {
+    whetherOwnMoreThanTwo.value = null
+  }
+}
+
 watch(
   [whetherOwnMoreThanFive, whetherOwnMoreThanTwo],
   async ([whetherOwnMoreThanFive, whetherOwnMoreThanTwo]) => {
@@ -39,6 +46,7 @@ watch(
         title="卖方是否取得房产证满 5 年？"
         :options="boolOptions"
         v-model:selected-value="whetherOwnMoreThanFive"
+        @update:selected-value="onWhetherOwnMoreThanFiveUpdate"
       />
     </div>
 
