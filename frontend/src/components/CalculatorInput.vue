@@ -299,6 +299,10 @@ watch(
 <style scoped></style>
 
 <style>
+#calculator-input {
+  margin-top: 90px;
+}
+
 .section {
   margin-bottom: 20px;
 }
