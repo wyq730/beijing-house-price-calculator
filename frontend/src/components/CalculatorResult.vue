@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { watch, type PropType, ref, nextTick } from 'vue'
+import { watch, type PropType, ref, nextTick, computed } from 'vue'
 import { type HousePriceResult } from './RuleBasedCalculator'
-import { NNumberAnimation, NumberAnimationInst } from 'naive-ui'
+import { NNumberAnimation, NumberAnimationInst, NButton } from 'naive-ui'
 
 const displayDigitNumberAfterDecimalPoint = 0
 
@@ -13,6 +13,22 @@ const numberAnimationInstRef = ref<NumberAnimationInst | null>(null)
 const currentTotal = ref<number | null>(null)
 const lastTotal = ref<number | null>(null)
 const showAll = ref<boolean>(false)
+
+const isResultReady = computed(() => {
+  return props.result !== undefined
+})
+
+function toggle() {
+  if (isResultReady.value) {
+    showAll.value = !showAll.value
+  }
+}
+
+watch(isResultReady, (isResultReady) => {
+  if (!isResultReady) {
+    showAll.value = false
+  }
+})
 
 watch(
   () => props.result,
@@ -26,13 +42,9 @@ watch(
 </script>
 
 <template>
-  <div
-    id="calculator-result"
-    :style="{ height: !showAll ? '28px' : '280px' }"
-    style="z-index: -1"
-    @click="showAll = !showAll"
-  >
-    <div>
+  <div id="calculator-result" :style="{ height: !showAll ? '28px' : '280px' }" @click="toggle">
+    <!-- set 'line-height' to align the left part and the right part. -->
+    <div v-if="isResultReady" style="line-height: 28px">
       <span class="total-text">总费用</span>
       <span class="total-number">
         <n-number-animation
@@ -44,6 +56,10 @@ watch(
           :precision="displayDigitNumberAfterDecimalPoint"
         />
       </span>
+      <div class="toggle-hint">{{ !showAll ? '（点击展开详情）' : '（点击收起详情）' }}</div>
+    </div>
+    <div v-else>
+      <span class="total-not-ready">请回答下面的问题</span>
     </div>
     <Transition>
       <div v-if="showAll" style="margin-top: 18px">
@@ -77,6 +93,18 @@ watch(
   font-size: 18px;
   font-weight: bold;
   color: forestgreen;
+}
+
+.toggle-hint {
+  font-size: 16px;
+  float: right;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.total-not-ready {
+  font-size: 18px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.5);
 }
 
 .breakdown-text {
