@@ -164,16 +164,6 @@ watch(
       </div>
     </n-collapse-transition>
 
-    <n-collapse-transition :show="currentRequiredInputs.has('whetherSellerOnlyProperty')">
-      <div class="section">
-        <OptionSelector
-          title="是否为卖方的唯一住房？"
-          :options="boolOptions"
-          v-model:selected-value="whetherSellerOnlyProperty"
-        />
-      </div>
-    </n-collapse-transition>
-
     <n-collapse-transition :show="currentRequiredInputs.has('timeSinceObtainedBySeller')">
       <TimeSinceObtainedBySellerInput
         @update-value="
@@ -182,6 +172,16 @@ watch(
           }
         "
       />
+    </n-collapse-transition>
+
+    <n-collapse-transition :show="currentRequiredInputs.has('whetherSellerOnlyProperty')">
+      <div class="section">
+        <OptionSelector
+          title="是否为卖方的唯一住房？"
+          :options="boolOptions"
+          v-model:selected-value="whetherSellerOnlyProperty"
+        />
+      </div>
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('largerThan90')">
@@ -275,7 +275,7 @@ watch(
     <n-collapse-transition :show="currentRequiredInputs.has('purchasedPublicAtDiscountedPrice')">
       <div class="section">
         <OptionSelector
-          title="该公房是否是按照标准价/成本价（而不是优惠价）购买的？"
+          title="该公房是否是按照优惠价（而不是标准价/成本价）购买的？"
           :options="boolOptions"
           v-model:selected-value="purchasedPublicAtDiscountedPrice"
         />
