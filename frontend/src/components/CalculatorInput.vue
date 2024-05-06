@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { NInputNumber, NCollapseTransition } from 'naive-ui'
+import { TenThousandRMBToRMB } from './Utils'
 import OptionSelector from './OptionSelector.vue'
 import RuleBasedCalculator from './RuleBasedCalculator'
 import TimeSinceObtainedBySellerInput from './ItemInput/TimeSinceObtainedBySellerInput.vue'
@@ -9,10 +10,6 @@ import GeneralHouseInput from './ItemInput/GeneralHouseInput.vue'
 import BuyerPropertyNumberInput from './ItemInput/BuyerPropertyNumberInput.vue'
 
 const emit = defineEmits(['update'])
-
-function TenThousandRMBToRMB(value: number | null): number | null {
-  return value === null ? null : value * 10000
-}
 
 const boolOptions = [
   { name: '是', value: true },

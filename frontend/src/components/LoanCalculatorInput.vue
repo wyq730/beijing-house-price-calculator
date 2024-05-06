@@ -4,9 +4,9 @@ import { NInputNumber } from 'naive-ui'
 import { type RepaymentMethod } from './LoanCalculator'
 import OptionSelector from './OptionSelector.vue'
 import { calculateRepaymentPlan } from './LoanCalculator'
-import { HousePriceArgument } from './RuleBasedCalculator'
+import { type HousePriceArgument } from './RuleBasedCalculator'
 import { NCollapseTransition } from 'naive-ui'
-import { assert } from './Utils'
+import { assert, TenThousandRMBToRMB } from './Utils'
 import BuyerPropertyNumberInput from './ItemInput/BuyerPropertyNumberInput.vue'
 import InsideSixUrbanDistrictInput from './ItemInput/InsideSixUrbanDistrictInput.vue'
 
@@ -49,7 +49,7 @@ const insideSixUrbanDistrict = computed(() => {
   if (props.priceArgs.insideSixUrbanDistrict !== null) {
     return props.priceArgs.insideSixUrbanDistrict
   }
-  return insideSixUrbanDistrictInputValue
+  return insideSixUrbanDistrictInputValue.value
 })
 
 function calculateCommercialLoanInterestRate(
@@ -118,7 +118,7 @@ watch(
     emit(
       'update-result',
       calculateRepaymentPlanFromInputs(
-        loanPrinciple,
+        TenThousandRMBToRMB(loanPrinciple),
         loanTermInYears,
         repaymentMethod,
         buyerPropertyNumber,

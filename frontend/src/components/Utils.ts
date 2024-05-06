@@ -8,4 +8,8 @@ function assert(pass: boolean, message?: string) {
   throw message
 }
 
-export { assert }
+function TenThousandRMBToRMB(value: number | null): number | null {
+  return value === null ? null : value * 10000
+}
+
+export { assert, TenThousandRMBToRMB }

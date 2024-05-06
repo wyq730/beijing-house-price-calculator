@@ -32,6 +32,10 @@ class RepaymentPlan {
     return detail
   }
 
+  loanRate(): number {
+    return this._args.annualInterestRatePercentage
+  }
+
   total(): number {
     return this.principle() + this.interest()
   }
@@ -122,4 +126,4 @@ function calculateRepaymentPlanForEqualPrincipleAndInterest(
   return repaymentPlan
 }
 
-export { calculateRepaymentPlan, type RepaymentMethod }
+export { calculateRepaymentPlan, type RepaymentMethod, type RepaymentPlan }
