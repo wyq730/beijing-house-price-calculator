@@ -4,8 +4,11 @@ import { NInputNumber, NCollapseTransition } from 'naive-ui'
 import OptionSelector from './OptionSelector.vue'
 import RuleBasedCalculator from './RuleBasedCalculator'
 import TimeSinceObtainedBySellerInput from './ItemInput/TimeSinceObtainedBySellerInput.vue'
+import InsideSixUrbanDistrictInput from './ItemInput/InsideSixUrbanDistrictInput.vue'
+import GeneralHouseInput from './ItemInput/GeneralHouseInput.vue'
+import BuyerPropertyNumberInput from './ItemInput/BuyerPropertyNumberInput.vue'
 
-const emit = defineEmits(['update-result'])
+const emit = defineEmits(['update'])
 
 function TenThousandRMBToRMB(value: number | null): number | null {
   return value === null ? null : value * 10000
@@ -21,11 +24,6 @@ const propertyTypeOptions = [
   { name: '已购公房', value: 'purchased_public' },
   { name: '一类经济适用房', value: 'first_class_affordable' },
   { name: '二类经济适用房', value: 'second_class_affordable' }
-]
-
-const houseNumberOptions = [
-  { name: '首套', value: 1 },
-  { name: '二套', value: 2 }
 ]
 
 const ringRoadRegionOptions = [
@@ -124,7 +122,7 @@ watch(
     const calculator = new RuleBasedCalculator(arg)
     const res = calculator.calculateOrFindMissedInputs()
     currentRequiredInputs.value = new Set(calculator.requiredInputs())
-    emit('update-result', res)
+    emit('update', arg, res, currentRequiredInputs.value)
   },
   { immediate: true }
 )
@@ -132,6 +130,7 @@ watch(
 
 <template>
   <div id="calculator-input">
+    <h1>总费用计算</h1>
     <n-collapse-transition :show="currentRequiredInputs.has('signedPrice')">
       <div class="section">
         <div class="title">网签价多少？</div>
@@ -155,13 +154,7 @@ watch(
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('buyerPropertyNumber')">
-      <div class="section">
-        <OptionSelector
-          title="是买方的第几套住房？"
-          :options="houseNumberOptions"
-          v-model:selected-value="buyerPropertyNumber"
-        />
-      </div>
+      <BuyerPropertyNumberInput v-model="buyerPropertyNumber" />
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('timeSinceObtainedBySeller')">
@@ -195,13 +188,7 @@ watch(
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('generalHouse')">
-      <div class="section">
-        <OptionSelector
-          title="是否为普通住宅？"
-          :options="boolOptions"
-          v-model:selected-value="generalHouse"
-        />
-      </div>
+      <GeneralHouseInput v-model="generalHouse" />
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('ringRoadRegion')">
@@ -215,13 +202,7 @@ watch(
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('insideSixUrbanDistrict')">
-      <div class="section">
-        <OptionSelector
-          title="是否在城六区内？"
-          :options="boolOptions"
-          v-model:selected-value="insideSixUrbanDistrict"
-        />
-      </div>
+      <InsideSixUrbanDistrictInput v-model="insideSixUrbanDistrict" />
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('buildingArea')">
@@ -299,8 +280,9 @@ watch(
 <style scoped></style>
 
 <style>
-#calculator-input {
-  margin-top: 90px;
+h1 {
+  font-size: 16px;
+  margin-bottom: 16px;
 }
 
 .section {

@@ -2,6 +2,7 @@
 import { watch, type PropType, ref, nextTick, computed } from 'vue'
 import { type HousePriceResult } from './RuleBasedCalculator'
 import { NNumberAnimation, NumberAnimationInst, NButton } from 'naive-ui'
+import { calculateRepaymentPlan } from './LoanCalculator'
 
 const displayDigitNumberAfterDecimalPoint = 0
 
