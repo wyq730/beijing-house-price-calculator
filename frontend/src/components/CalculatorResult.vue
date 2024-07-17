@@ -143,7 +143,8 @@ watch(
           展开还款计划
         </n-button>
 
-        <div v-if="showRepaymentDetail" style="margin-top: 20px">
+        <!-- set "max-width" to make it look better on desktop. -->
+        <div v-if="showRepaymentDetail" style="margin-top: 20px; max-width: 500px">
           <n-table :single-line="false" size="small" striped>
             <thead>
               <th>期</th>
@@ -184,6 +185,7 @@ watch(
 
 <style scoped>
 #calculator-result {
+  background-color: rgba(200, 200, 200, 0.05);
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
   padding: 20px;
   cursor: pointer;
@@ -212,7 +214,7 @@ watch(
 .toggle-hint {
   font-size: 16px;
   float: right;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(0, 0, 0, 0.45);
 }
 
 .total-not-ready {
@@ -224,7 +226,7 @@ watch(
 .breakdown-text {
   font-weight: bold;
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(0, 0, 0, 0.45);
 }
 
 .breakdown-number {
@@ -244,7 +246,7 @@ watch(
 .repayment-text {
   font-weight: bold;
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(0, 0, 0, 0.45);
 }
 
 .repayment-number {
