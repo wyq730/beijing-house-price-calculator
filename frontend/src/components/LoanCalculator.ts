@@ -27,7 +27,7 @@ class RepaymentPlan {
         interest: monthPlanData.interest,
         remainPrinciple: remainPrinciple
       })
-      remainPrinciple -= monthPlanData.interest
+      remainPrinciple -= monthPlanData.principle
     }
     return detail
   }
@@ -50,10 +50,6 @@ class RepaymentPlan {
 
   durationInYears(): number {
     return this._args.durationInYears
-  }
-
-  annualInterestRate(): number {
-    return this._args.annualInterestRatePercentage
   }
 }
 

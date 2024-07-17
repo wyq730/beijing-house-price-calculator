@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { watch, type PropType, ref, nextTick, computed } from 'vue'
 import { type HousePriceResult } from './RuleBasedCalculator'
-import { NNumberAnimation, NumberAnimationInst, NButton } from 'naive-ui'
+import { NNumberAnimation, NumberAnimationInst, NButton, NTable } from 'naive-ui'
 import { type RepaymentPlan } from './LoanCalculator'
 
 const displayDigitNumberAfterDecimalPoint = 0
@@ -35,6 +35,12 @@ const loanRate = computed(() => {
 
   return props.repaymentPlan.loanRate()
 })
+const repaymentDetail = computed(() => {
+  if (props.repaymentPlan === null) {
+    return null
+  }
+  return props.repaymentPlan.detail()
+})
 
 function toggle() {
   if (isResultReady.value) {
@@ -59,17 +65,10 @@ watch(
     lastTotal.value = currentTotal.value
   }
 )
-
-const topBarHeight = computed(() => {
-  if (!showAll.value) {
-    return '28px'
-  }
-  return '400px'
-})
 </script>
 
 <template>
-  <div id="calculator-result" :style="{ height: topBarHeight }" @click="toggle">
+  <div id="calculator-result" @click="toggle">
     <!-- set 'line-height' to align the left part and the right part. -->
     <div v-if="isResultReady" style="line-height: 28px">
       <span class="total-text">总费用</span>
@@ -106,7 +105,7 @@ const topBarHeight = computed(() => {
 
     <!-- Detail of the repayment plan. -->
     <Transition>
-      <div v-if="isRepaymentPlanReady" style="margin-top: 22px">
+      <div v-if="showAll && isRepaymentPlanReady" style="margin-top: 22px">
         <div class="repayment-summary">贷款</div>
         <div style="margin-top: 10px">
           <div>
@@ -119,6 +118,13 @@ const topBarHeight = computed(() => {
           <div>
             <span class="repayment-text">利率</span>
             <span class="repayment-number"> {{ loanRate }}% </span>
+          </div>
+
+          <div>
+            <span class="repayment-text">利息 + 本金</span>
+            <span class="repayment-number">
+              {{ (currentTotal + totalInterest).toFixed(displayDigitNumberAfterDecimalPoint) }}
+            </span>
           </div>
         </div>
 
@@ -137,7 +143,40 @@ const topBarHeight = computed(() => {
           展开还款计划
         </n-button>
 
-        <div v-if="showRepaymentDetail">detail</div>
+        <div v-if="showRepaymentDetail" style="margin-top: 20px">
+          <n-table :single-line="false" size="small" striped>
+            <thead>
+              <th>期</th>
+              <th>月供总额</th>
+              <th>月供本金</th>
+              <th>月供利息</th>
+              <th>剩余本金</th>
+            </thead>
+            <tbody>
+              <tr v-for="(monthPlanData, idx) in repaymentDetail">
+                <td>{{ Math.floor(idx / 12) + 1 }} - {{ (idx % 12) + 1 }}</td>
+                <td>
+                  {{
+                    (monthPlanData.principle + monthPlanData.interest).toFixed(
+                      displayDigitNumberAfterDecimalPoint
+                    )
+                  }}
+                </td>
+                <td>{{ monthPlanData.principle.toFixed(displayDigitNumberAfterDecimalPoint) }}</td>
+                <td>
+                  {{ monthPlanData.interest.toFixed(displayDigitNumberAfterDecimalPoint) }}
+                </td>
+                <td>
+                  {{
+                    Math.max(monthPlanData.remainPrinciple - monthPlanData.principle, 0).toFixed(
+                      displayDigitNumberAfterDecimalPoint
+                    )
+                  }}
+                </td>
+              </tr>
+            </tbody>
+          </n-table>
+        </div>
       </div>
     </Transition>
   </div>
@@ -145,7 +184,6 @@ const topBarHeight = computed(() => {
 
 <style scoped>
 #calculator-result {
-  transition: height 400ms;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
   padding: 20px;
   cursor: pointer;
