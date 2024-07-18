@@ -6,6 +6,7 @@ import OptionSelector from './OptionSelector.vue'
 import RuleBasedCalculator from './RuleBasedCalculator'
 import TimeSinceObtainedBySellerInput from './ItemInput/TimeSinceObtainedBySellerInput.vue'
 import InsideSixUrbanDistrictInput from './ItemInput/InsideSixUrbanDistrictInput.vue'
+import RingRoadRegionInput from './ItemInput/RingRoadRegionInput.vue'
 import GeneralHouseInput from './ItemInput/GeneralHouseInput.vue'
 import BuyerPropertyNumberInput from './ItemInput/BuyerPropertyNumberInput.vue'
 
@@ -21,12 +22,6 @@ const propertyTypeOptions = [
   { name: '已购公房', value: 'purchased_public' },
   { name: '一类经济适用房', value: 'first_class_affordable' },
   { name: '二类经济适用房', value: 'second_class_affordable' }
-]
-
-const ringRoadRegionOptions = [
-  { name: '五环内', value: 'inside_5' },
-  { name: '五环和六环之间', value: 'between_5_and_6' },
-  { name: '六环外', value: 'outside_6' }
 ]
 
 const firstClassAffordableBuyBefore20080411Options = [
@@ -189,13 +184,7 @@ watch(
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('ringRoadRegion')">
-      <div class="section">
-        <OptionSelector
-          title="在几环？"
-          :options="ringRoadRegionOptions"
-          v-model:selected-value="ringRoadRegion"
-        />
-      </div>
+      <RingRoadRegionInput v-model="ringRoadRegion" />
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('insideSixUrbanDistrict')">

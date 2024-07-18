@@ -8,7 +8,7 @@ import { type HousePriceArgument } from './RuleBasedCalculator'
 import { NCollapseTransition } from 'naive-ui'
 import { assert, TenThousandRMBToRMB } from './Utils'
 import BuyerPropertyNumberInput from './ItemInput/BuyerPropertyNumberInput.vue'
-import InsideSixUrbanDistrictInput from './ItemInput/InsideSixUrbanDistrictInput.vue'
+import RingRoadRegionInput from './ItemInput/RingRoadRegionInput.vue'
 
 const emit = defineEmits(['update-result'])
 const props = defineProps({
@@ -29,7 +29,7 @@ const repaymentMethod = ref<RepaymentMethod | null>(null)
 
 // For the following argument, refer to props.priceArgs first. If it's null, use the input in the current component.
 const buyerPropertyNumberInputValue = ref<number | null>(null)
-const insideSixUrbanDistrictInputValue = ref<boolean | null>(null)
+const ringRoadRegionInputValue = ref<boolean | null>(null)
 
 const buyerPropertyNumber = computed(() => {
   if (props.priceArgs === undefined) {
@@ -42,35 +42,42 @@ const buyerPropertyNumber = computed(() => {
   return buyerPropertyNumberInputValue.value
 })
 
-const insideSixUrbanDistrict = computed(() => {
+const ringRoadRegion = computed(() => {
   if (props.priceArgs === undefined) {
     return null
   }
-  if (props.priceArgs.insideSixUrbanDistrict !== null) {
-    return props.priceArgs.insideSixUrbanDistrict
+  if (props.priceArgs.ringRoadRegion !== null) {
+    return props.priceArgs.ringRoadRegion
   }
-  return insideSixUrbanDistrictInputValue.value
+  return ringRoadRegionInputValue.value
+})
+
+const insideFifthRingRoad = computed(() => {
+  if (ringRoadRegion.value === null) {
+    return null
+  }
+  return ringRoadRegion.value == 'inside_5'
 })
 
 function calculateCommercialLoanInterestRate(
   buyerPropertyNumber: number,
-  insideSixUrbanDistrict: boolean
+  insideFifthRingRoad: boolean
 ) {
-  if (buyerPropertyNumber === 1 && insideSixUrbanDistrict === true) {
-    return 4.05
+  if (buyerPropertyNumber === 1 && insideFifthRingRoad === true) {
+    return 3.5
   }
-  if (buyerPropertyNumber === 1 && insideSixUrbanDistrict === false) {
-    return 3.95
+  if (buyerPropertyNumber === 1 && insideFifthRingRoad === false) {
+    return 3.5
   }
-  if (buyerPropertyNumber === 2 && insideSixUrbanDistrict === true) {
-    return 4.55
+  if (buyerPropertyNumber === 2 && insideFifthRingRoad === true) {
+    return 3.9
   }
-  if (buyerPropertyNumber === 2 && insideSixUrbanDistrict === false) {
-    return 4.5
+  if (buyerPropertyNumber === 2 && insideFifthRingRoad === false) {
+    return 3.7
   }
   assert(
     false,
-    `Invalid buyerPropertyNumber (${buyerPropertyNumber}) or insideSixUrbanDistrict (${insideSixUrbanDistrict})`
+    `Invalid buyerPropertyNumber (${buyerPropertyNumber}) or insideFifthRingRoad (${insideFifthRingRoad})`
   )
 }
 
@@ -79,7 +86,7 @@ function calculateRepaymentPlanFromInputs(
   loanTermInYears,
   repaymentMethod,
   buyerPropertyNumber,
-  insideSixUrbanDistrict
+  insideFifthRingRoad
 ) {
   if (
     [
@@ -87,16 +94,13 @@ function calculateRepaymentPlanFromInputs(
       loanTermInYears,
       repaymentMethod,
       buyerPropertyNumber,
-      insideSixUrbanDistrict
+      insideFifthRingRoad
     ].some((v) => v === null)
   ) {
     return null
   }
 
-  const interestRate = calculateCommercialLoanInterestRate(
-    buyerPropertyNumber,
-    insideSixUrbanDistrict
-  )
+  const interestRate = calculateCommercialLoanInterestRate(buyerPropertyNumber, insideFifthRingRoad)
 
   return calculateRepaymentPlan({
     principle: loanPrinciple,
@@ -107,14 +111,8 @@ function calculateRepaymentPlanFromInputs(
 }
 
 watch(
-  [loanPrinciple, loanTermInYears, repaymentMethod, buyerPropertyNumber, insideSixUrbanDistrict],
-  ([
-    loanPrinciple,
-    loanTermInYears,
-    repaymentMethod,
-    buyerPropertyNumber,
-    insideSixUrbanDistrict
-  ]) => {
+  [loanPrinciple, loanTermInYears, repaymentMethod, buyerPropertyNumber, insideFifthRingRoad],
+  ([loanPrinciple, loanTermInYears, repaymentMethod, buyerPropertyNumber, insideFifthRingRoad]) => {
     emit(
       'update-result',
       calculateRepaymentPlanFromInputs(
@@ -122,7 +120,7 @@ watch(
         loanTermInYears,
         repaymentMethod,
         buyerPropertyNumber,
-        insideSixUrbanDistrict
+        insideFifthRingRoad
       )
     )
   }
@@ -168,11 +166,9 @@ watch(
     </n-collapse-transition>
 
     <n-collapse-transition
-      :show="
-        priceRequiredInputs !== undefined && !priceRequiredInputs.has('insideSixUrbanDistrict')
-      "
+      :show="priceRequiredInputs !== undefined && !priceRequiredInputs.has('ringRoadRegion')"
     >
-      <InsideSixUrbanDistrictInput v-model="insideSixUrbanDistrictInputValue" />
+      <RingRoadRegionInput v-model="ringRoadRegionInputValue" />
     </n-collapse-transition>
   </div>
 </template>
