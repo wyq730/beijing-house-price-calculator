@@ -10,13 +10,10 @@
 
 import { rules, type ItemCalculator } from './Rules'
 import { assert } from './Utils'
+import { type PropertyType } from './Constants'
 
 interface HousePriceArgument {
-  propertyType:
-    | 'commercial'
-    | 'purchased_public'
-    | 'first_class_affordable'
-    | 'second_class_affordable'
+  propertyType: PropertyType
   buyerPropertyNumber: number
   timeSinceObtainedBySeller: 'longer_than_5' | '2_to_5' | 'shorter_than_2' // merge whetherOwnMoreThanTwo and whetherOwnMoreThanFive
 

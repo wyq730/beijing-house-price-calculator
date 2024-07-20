@@ -82,11 +82,11 @@ function calculateCommercialLoanInterestRate(
 }
 
 function calculateRepaymentPlanFromInputs(
-  loanPrinciple,
-  loanTermInYears,
-  repaymentMethod,
-  buyerPropertyNumber,
-  insideFifthRingRoad
+  loanPrinciple: number | null,
+  loanTermInYears: number | null,
+  repaymentMethod: RepaymentMethod | null,
+  buyerPropertyNumber: number | null,
+  insideFifthRingRoad: boolean | null
 ) {
   if (
     [
@@ -113,6 +113,7 @@ function calculateRepaymentPlanFromInputs(
 watch(
   [loanPrinciple, loanTermInYears, repaymentMethod, buyerPropertyNumber, insideFifthRingRoad],
   ([loanPrinciple, loanTermInYears, repaymentMethod, buyerPropertyNumber, insideFifthRingRoad]) => {
+    console.debug('Input (loan section) changed!')
     emit(
       'update-result',
       calculateRepaymentPlanFromInputs(

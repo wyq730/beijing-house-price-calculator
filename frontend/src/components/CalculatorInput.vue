@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { NInputNumber, NCollapseTransition } from 'naive-ui'
 import { TenThousandRMBToRMB } from './Utils'
 import OptionSelector from './OptionSelector.vue'
@@ -9,6 +9,7 @@ import InsideSixUrbanDistrictInput from './ItemInput/InsideSixUrbanDistrictInput
 import RingRoadRegionInput from './ItemInput/RingRoadRegionInput.vue'
 import GeneralHouseInput from './ItemInput/GeneralHouseInput.vue'
 import BuyerPropertyNumberInput from './ItemInput/BuyerPropertyNumberInput.vue'
+import { type PropertyTypeOrNull } from './Constants'
 
 const emit = defineEmits(['update'])
 
@@ -29,68 +30,73 @@ const firstClassAffordableBuyBefore20080411Options = [
   { name: '2008/04/11 后', value: false }
 ]
 
-const propertyType = ref<string | null>(null)
-const buyerPropertyNumber = ref<number | null>(null)
-const timeSinceObtainedBySeller = ref<number | null>(null)
-const whetherSellerOnlyProperty = ref<boolean | null>(null)
-const largerThan90 = ref<boolean | null>(null)
-const generalHouse = ref<boolean | null>(null) // 是否为普通住宅。
-const ringRoadRegion = ref<string | null>(null)
-const insideSixUrbanDistrict = ref<boolean | null>(null) // 是否在城六区内。
+/*************************************************
+ * All the user inputs. [SECTION BEGIN]
+ *************************************************/
 
-const signedPrice = ref<number | null>(null)
-const buildingArea = ref<number | null>(null)
+interface HousePriceInput {
+  propertyType: PropertyTypeOrNull
+  buyerPropertyNumber: number | null
+  timeSinceObtainedBySeller: number | null
+  whetherSellerOnlyProperty: boolean | null
+  largerThan90: boolean | null
+  generalHouse: boolean | null // 是否为普通住宅。
+  ringRoadRegion: string | null
+  insideSixUrbanDistrict: boolean | null // 是否在城六区内。
+  signedPrice: number | null
+  buildingArea: number | null
+  originalPrice: number | null
+  originalDeedTax: number | null
+  sellerPaidInterest: number | null
+  purchasedPublicAtDiscountedPrice: number | null
+  firstClassAffordableBuyBefore20080411: boolean | null
+}
 
-const originalPrice = ref<number | null>(null)
-const originalDeedTax = ref<number | null>(null)
-const sellerPaidInterest = ref<number | null>(null)
+const housePriceInputs: HousePriceInput = reactive({
+  propertyType: null,
+  buyerPropertyNumber: null,
+  timeSinceObtainedBySeller: null,
+  whetherSellerOnlyProperty: null,
+  largerThan90: null,
+  generalHouse: null,
+  ringRoadRegion: null,
+  insideSixUrbanDistrict: null,
+  signedPrice: null,
+  buildingArea: null,
+  originalPrice: null,
+  originalDeedTax: null,
+  sellerPaidInterest: null,
+  purchasedPublicAtDiscountedPrice: null,
+  firstClassAffordableBuyBefore20080411: null
+})
 
-const purchasedPublicAtDiscountedPrice = ref<number | null>(null)
-
-const firstClassAffordableBuyBefore20080411 = ref<boolean | null>(null)
+/*************************************************
+ * All the user inputs. [SECTION END]
+ *************************************************/
 
 const currentRequiredInputs = ref<Set<string>>(new Set())
 watch(
-  [
-    propertyType,
-    buyerPropertyNumber,
-    timeSinceObtainedBySeller,
-    whetherSellerOnlyProperty,
-    largerThan90,
-    generalHouse,
-    ringRoadRegion,
-    insideSixUrbanDistrict,
+  housePriceInputs,
+  async (housePriceInputs) => {
+    const {
+      propertyType,
+      buyerPropertyNumber,
+      timeSinceObtainedBySeller,
+      whetherSellerOnlyProperty,
+      largerThan90,
+      generalHouse,
+      ringRoadRegion,
+      insideSixUrbanDistrict,
+      signedPrice,
+      buildingArea,
+      originalPrice,
+      originalDeedTax,
+      sellerPaidInterest,
+      purchasedPublicAtDiscountedPrice,
+      firstClassAffordableBuyBefore20080411
+    } = housePriceInputs
 
-    signedPrice,
-    buildingArea,
-
-    originalPrice,
-    originalDeedTax,
-    sellerPaidInterest,
-
-    purchasedPublicAtDiscountedPrice,
-    firstClassAffordableBuyBefore20080411
-  ],
-  async ([
-    propertyType,
-    buyerPropertyNumber,
-    timeSinceObtainedBySeller,
-    whetherSellerOnlyProperty,
-    largerThan90,
-    generalHouse,
-    ringRoadRegion,
-    insideSixUrbanDistrict,
-
-    signedPrice,
-    buildingArea,
-
-    originalPrice,
-    originalDeedTax,
-    sellerPaidInterest,
-
-    purchasedPublicAtDiscountedPrice,
-    firstClassAffordableBuyBefore20080411
-  ]) => {
+    console.debug('Input (main section) changed!')
     const arg = {
       propertyType,
       buyerPropertyNumber,
@@ -102,11 +108,9 @@ watch(
       insideSixUrbanDistrict,
       signedPrice: TenThousandRMBToRMB(signedPrice),
       buildingArea,
-
       originalPrice: TenThousandRMBToRMB(originalPrice),
       originalDeedTax: TenThousandRMBToRMB(originalDeedTax),
       sellerPaidInterest: TenThousandRMBToRMB(sellerPaidInterest),
-
       purchasedPublicAtDiscountedPrice,
       firstClassAffordableBuyBefore20080411
     }
@@ -127,7 +131,7 @@ watch(
       <div class="section">
         <div class="title">网签价多少？</div>
         <n-input-number
-          v-model:value="signedPrice"
+          v-model:value="housePriceInputs.signedPrice"
           clearable
           placeholder="网签价（万元）"
           style="width: 200px"
@@ -140,20 +144,20 @@ watch(
         <OptionSelector
           title="房屋性质是？"
           :options="propertyTypeOptions"
-          v-model:selected-value="propertyType"
+          v-model:selected-value="housePriceInputs.propertyType"
         />
       </div>
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('buyerPropertyNumber')">
-      <BuyerPropertyNumberInput v-model="buyerPropertyNumber" />
+      <BuyerPropertyNumberInput v-model="housePriceInputs.buyerPropertyNumber" />
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('timeSinceObtainedBySeller')">
       <TimeSinceObtainedBySellerInput
         @update-value="
           (v) => {
-            timeSinceObtainedBySeller = v
+            housePriceInputs.timeSinceObtainedBySeller = v
           }
         "
       />
@@ -164,7 +168,7 @@ watch(
         <OptionSelector
           title="是否为卖方的唯一住房？"
           :options="boolOptions"
-          v-model:selected-value="whetherSellerOnlyProperty"
+          v-model:selected-value="housePriceInputs.whetherSellerOnlyProperty"
         />
       </div>
     </n-collapse-transition>
@@ -174,28 +178,28 @@ watch(
         <OptionSelector
           title="是否大于 90 平米？"
           :options="boolOptions"
-          v-model:selected-value="largerThan90"
+          v-model:selected-value="housePriceInputs.largerThan90"
         />
       </div>
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('generalHouse')">
-      <GeneralHouseInput v-model="generalHouse" />
+      <GeneralHouseInput v-model="housePriceInputs.generalHouse" />
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('ringRoadRegion')">
-      <RingRoadRegionInput v-model="ringRoadRegion" />
+      <RingRoadRegionInput v-model="housePriceInputs.ringRoadRegion" />
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('insideSixUrbanDistrict')">
-      <InsideSixUrbanDistrictInput v-model="insideSixUrbanDistrict" />
+      <InsideSixUrbanDistrictInput v-model="housePriceInputs.insideSixUrbanDistrict" />
     </n-collapse-transition>
 
     <n-collapse-transition :show="currentRequiredInputs.has('buildingArea')">
       <div class="section">
         <div class="title">建筑面积是多少？</div>
         <n-input-number
-          v-model:value="buildingArea"
+          v-model:value="housePriceInputs.buildingArea"
           clearable
           placeholder="建筑面积（平米）"
           style="width: 200px"
@@ -207,7 +211,7 @@ watch(
       <div class="section">
         <div class="title">原值多少？</div>
         <n-input-number
-          v-model:value="originalPrice"
+          v-model:value="housePriceInputs.originalPrice"
           clearable
           placeholder="原值（万元）"
           style="width: 200px"
@@ -219,7 +223,7 @@ watch(
       <div class="section">
         <div class="title">原契税多少？</div>
         <n-input-number
-          v-model:value="originalDeedTax"
+          v-model:value="housePriceInputs.originalDeedTax"
           clearable
           placeholder="原契税（万元）"
           style="width: 200px"
@@ -231,7 +235,7 @@ watch(
       <div class="section">
         <div class="title">卖方已经支付的贷款利息有多少？</div>
         <n-input-number
-          v-model:value="sellerPaidInterest"
+          v-model:value="housePriceInputs.sellerPaidInterest"
           clearable
           placeholder="卖方已经支付的贷款利息（万元）"
           style="width: 200px"
@@ -244,7 +248,7 @@ watch(
         <OptionSelector
           title="该公房是否是按照优惠价（而不是标准价/成本价）购买的？"
           :options="boolOptions"
-          v-model:selected-value="purchasedPublicAtDiscountedPrice"
+          v-model:selected-value="housePriceInputs.purchasedPublicAtDiscountedPrice"
         />
       </div>
     </n-collapse-transition>
@@ -256,7 +260,7 @@ watch(
         <OptionSelector
           title="该一类经适房是在什么时候签订购房合同的？"
           :options="firstClassAffordableBuyBefore20080411Options"
-          v-model:selected-value="firstClassAffordableBuyBefore20080411"
+          v-model:selected-value="housePriceInputs.firstClassAffordableBuyBefore20080411"
         />
       </div>
     </n-collapse-transition>
