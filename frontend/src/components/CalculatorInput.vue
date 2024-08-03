@@ -9,7 +9,12 @@ import InsideSixUrbanDistrictInput from './ItemInput/InsideSixUrbanDistrictInput
 import RingRoadRegionInput from './ItemInput/RingRoadRegionInput.vue'
 import GeneralHouseInput from './ItemInput/GeneralHouseInput.vue'
 import BuyerPropertyNumberInput from './ItemInput/BuyerPropertyNumberInput.vue'
-import { type PropertyTypeOrNull } from './Constants'
+import {
+  type NumberOrNull,
+  type BooleanOrNull,
+  type PropertyTypeOrNull,
+  type TimeSinceObtainedBySellerOrNull
+} from './Constants'
 
 const emit = defineEmits(['update'])
 
@@ -30,26 +35,22 @@ const firstClassAffordableBuyBefore20080411Options = [
   { name: '2008/04/11 后', value: false }
 ]
 
-/*************************************************
- * All the user inputs. [SECTION BEGIN]
- *************************************************/
-
 interface HousePriceInput {
   propertyType: PropertyTypeOrNull
-  buyerPropertyNumber: number | null
-  timeSinceObtainedBySeller: number | null
-  whetherSellerOnlyProperty: boolean | null
-  largerThan90: boolean | null
-  generalHouse: boolean | null // 是否为普通住宅。
+  buyerPropertyNumber: NumberOrNull
+  timeSinceObtainedBySeller: TimeSinceObtainedBySellerOrNull
+  whetherSellerOnlyProperty: BooleanOrNull
+  largerThan90: BooleanOrNull
+  generalHouse: BooleanOrNull // 是否为普通住宅。
   ringRoadRegion: string | null
-  insideSixUrbanDistrict: boolean | null // 是否在城六区内。
+  insideSixUrbanDistrict: BooleanOrNull // 是否在城六区内。
   signedPrice: number | null
   buildingArea: number | null
   originalPrice: number | null
   originalDeedTax: number | null
   sellerPaidInterest: number | null
   purchasedPublicAtDiscountedPrice: number | null
-  firstClassAffordableBuyBefore20080411: boolean | null
+  firstClassAffordableBuyBefore20080411: BooleanOrNull
 }
 
 const housePriceInputs: HousePriceInput = reactive({
@@ -69,10 +70,6 @@ const housePriceInputs: HousePriceInput = reactive({
   purchasedPublicAtDiscountedPrice: null,
   firstClassAffordableBuyBefore20080411: null
 })
-
-/*************************************************
- * All the user inputs. [SECTION END]
- *************************************************/
 
 const currentRequiredInputs = ref<Set<string>>(new Set())
 watch(
@@ -96,7 +93,6 @@ watch(
       firstClassAffordableBuyBefore20080411
     } = housePriceInputs
 
-    console.debug('Input (main section) changed!')
     const arg = {
       propertyType,
       buyerPropertyNumber,
@@ -155,11 +151,7 @@ watch(
 
     <n-collapse-transition :show="currentRequiredInputs.has('timeSinceObtainedBySeller')">
       <TimeSinceObtainedBySellerInput
-        @update-value="
-          (v) => {
-            housePriceInputs.timeSinceObtainedBySeller = v
-          }
-        "
+        @update-value="(v) => (housePriceInputs.timeSinceObtainedBySeller = v)"
       />
     </n-collapse-transition>
 

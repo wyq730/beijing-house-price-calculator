@@ -113,7 +113,6 @@ function calculateRepaymentPlanFromInputs(
 watch(
   [loanPrinciple, loanTermInYears, repaymentMethod, buyerPropertyNumber, insideFifthRingRoad],
   ([loanPrinciple, loanTermInYears, repaymentMethod, buyerPropertyNumber, insideFifthRingRoad]) => {
-    console.debug('Input (loan section) changed!')
     emit(
       'update-result',
       calculateRepaymentPlanFromInputs(

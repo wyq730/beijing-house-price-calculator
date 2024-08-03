@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, type PropType } from 'vue'
 import OptionSelector from '../OptionSelector.vue'
 import { NCollapseTransition } from 'naive-ui'
+import { type BooleanOrNull, type TimeSinceObtainedBySellerOrNull } from '../Constants'
 
+const props = defineProps(['show'])
 const emit = defineEmits(['update-value'])
 
 const boolOptions = [
@@ -20,21 +22,46 @@ function onWhetherOwnMoreThanFiveUpdate(newVal: boolean) {
   }
 }
 
+function convertSelectedValuesToOutputValue(
+  whetherOwnMoreThanFive: BooleanOrNull,
+  whetherOwnMoreThanTwo: BooleanOrNull
+) {
+  let timeSinceObtainedBySeller
+  if (whetherOwnMoreThanFive === null) {
+    timeSinceObtainedBySeller = null
+  } else if (whetherOwnMoreThanFive === true) {
+    timeSinceObtainedBySeller = 'longer_than_5'
+  } else if (whetherOwnMoreThanTwo === null) {
+    timeSinceObtainedBySeller = null
+  } else if (whetherOwnMoreThanTwo === true) {
+    timeSinceObtainedBySeller = '2_to_5'
+  } else {
+    timeSinceObtainedBySeller = 'shorter_than_2'
+  }
+  return timeSinceObtainedBySeller
+}
+
+function reset() {
+  whetherOwnMoreThanFive.value = null
+  whetherOwnMoreThanTwo.value = null
+}
+
+watch(
+  () => props.show,
+  (newShow) => {
+    if (newShow === false) {
+      reset()
+    }
+  }
+)
+
 watch(
   [whetherOwnMoreThanFive, whetherOwnMoreThanTwo],
   async ([whetherOwnMoreThanFive, whetherOwnMoreThanTwo]) => {
-    let timeSinceObtainedBySeller
-    if (whetherOwnMoreThanFive === null) {
-      timeSinceObtainedBySeller = null
-    } else if (whetherOwnMoreThanFive === true) {
-      timeSinceObtainedBySeller = 'longer_than_5'
-    } else if (whetherOwnMoreThanTwo === null) {
-      timeSinceObtainedBySeller = null
-    } else if (whetherOwnMoreThanTwo === true) {
-      timeSinceObtainedBySeller = '2_to_5'
-    } else {
-      timeSinceObtainedBySeller = 'shorter_than_2'
-    }
+    const timeSinceObtainedBySeller = convertSelectedValuesToOutputValue(
+      whetherOwnMoreThanFive,
+      whetherOwnMoreThanTwo
+    )
     emit('update-value', timeSinceObtainedBySeller)
   }
 )

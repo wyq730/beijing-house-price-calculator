@@ -10,15 +10,15 @@
 
 import { rules, type ItemCalculator } from './Rules'
 import { assert } from './Utils'
-import { type PropertyType } from './Constants'
+import { type BooleanOrNull, type PropertyType, type TimeSinceObtainedBySeller } from './Constants'
 
 interface HousePriceArgument {
   propertyType: PropertyType
   buyerPropertyNumber: number
-  timeSinceObtainedBySeller: 'longer_than_5' | '2_to_5' | 'shorter_than_2' // merge whetherOwnMoreThanTwo and whetherOwnMoreThanFive
+  timeSinceObtainedBySeller: TimeSinceObtainedBySeller
 
   // 不满五 (timeSinceObtainedBySeller 不为 longer_than_5) 时，需要填写。
-  whetherSellerOnlyProperty: boolean | null
+  whetherSellerOnlyProperty: BooleanOrNull
 
   // 二套 (buyerPropertyNumber 不为 1) 时，需要填写。
   largerThan90: boolean | null
