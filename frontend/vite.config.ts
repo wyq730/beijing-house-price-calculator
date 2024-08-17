@@ -6,7 +6,7 @@ import VueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/bj-house-price-calculator/',
+  base: '/beijing-house-price-calculator/',
   plugins: [vue(), VueDevTools()],
   resolve: {
     alias: {
