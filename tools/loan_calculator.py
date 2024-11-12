@@ -65,6 +65,7 @@ class PlanCalculator(ABC):
             plan[-1].principle += prepayment.amount
 
             remain_principle = self._arg.principle - sum(r.principle for r in plan)
+            assert remain_principle >= 0, f'Prepayment exceeds the remain amount.'
 
             if prepayment.method == PrepaymentMethod.REDUCE_AMOUNT:
                 remain_duration_in_months = self._arg.duration_in_years * 12 - len(plan)
@@ -193,11 +194,11 @@ class EqualPrincipleAndInterestPlanCalculator(PlanCalculator):
 
 
 if __name__ == '__main__':
-    arg = RepaymentArgs(principle=2500000, duration_in_years=30,
+    arg = RepaymentArgs(principle=1100000, duration_in_years=20,
                         annual_interest_rate_percentage=3.15,
                         prepayments=[
-                            Prepayment(120, 500000, PrepaymentMethod.REDUCE_AMOUNT),
-                            Prepayment(240, 200000, PrepaymentMethod.REDUCE_AMOUNT),
+                            Prepayment(120, 500000, PrepaymentMethod.REDUCE_DURATION),
+                            # Prepayment(240, 200000, PrepaymentMethod.REDUCE_AMOUNT),
                         ])
-    c = EqualPrincipleAndInterestPlanCalculator(arg)
+    c = EqualPrinciplePlanCalculator(arg)
     c.print_plan()
